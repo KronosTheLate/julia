@@ -129,10 +129,12 @@ function get!(default::Callable, wkh::WeakKeyDict{K}, key) where {K}
 end
 
 function getkey(wkh::WeakKeyDict{K}, kk, default) where K
-    k = lock(wkh) do
-        k = getkey(wkh.ht, kk, nothing)
-        k === nothing && return nothing
-        return k.value
+    k = let wkh=wkh
+        lock(wkh) do
+            k = getkey(wkh.ht, kk, nothing)
+            k === nothing && return nothing
+            return k.value
+        end
     end
     return k === nothing ? default : k::K
 end
